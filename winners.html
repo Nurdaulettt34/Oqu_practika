@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Жеңімпаздар | Қазақ әдебиеті</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="/" class="btn btn-secondary"><i class="fas fa-plus"></i> Кітап қосу</a>
+            <a href="/all-books" class="btn btn-secondary"><i class="fas fa-book"></i> Барлық кітаптар</a>
+            <a href="/winners" class="btn btn-primary"><i class="fas fa-trophy"></i> Жеңімпаздар</a>
+        </div>
+        
+        <div class="winner-page">
+            <div class="trophy-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h1>Жеңімпаз кітап</h1>
+            
+            {% if not voting_over %}
+                <div class="info-box">
+                    <p>Дауыс беру {{ voting_end.strftime('%Y-%m-%d') }} аяқталады</p>
+                    <p class="countdown">Қалған уақыт: {{ (voting_end - now).days }} күн</p>
+                </div>
+            {% else %}
+                {% if winner %}
+                <div class="winner-card">
+                    <h2>{{ winner.title }}</h2>
+                    <p class="winner-author">{{ winner.author }}</p>
+                    
+                    <div class="winner-genres">
+                        {% for genre in winner.genres %}
+                        <span class="genre-badge">{{ genre }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="winner-votes">
+                        <span class="votes-count">{{ winner.votes }}</span>
+                        <span class="votes-label">дауыс</span>
+                    </div>
+                    
+                    <p class="winner-message">Құттықтаймыз! Бұл кітап ең көп дауыс жинады!</p>
+                </div>
+                {% else %}
+                <div class="info-box">
+                    <p>Дауыс беру аяқталды, бірақ жеңімпаз анықталмады</p>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            <div class="action-buttons">
+                <a href="/all-books" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Кітаптар тізіміне оралу
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

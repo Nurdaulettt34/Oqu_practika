@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика | Қазақ әдебиеті</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Ортақ стильдер мұнда... */
+        
+        /* Бетке арналған қосымша стильдер */
+        .stats-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            margin: 3rem 0;
+            position: relative;
+            height: 400px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stats-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .genre-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .genre-name {
+            font-weight: 500;
+        }
+        
+        .genre-count {
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .top-books {
+            margin-top: 1rem;
+        }
+        
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .book-rank {
+            font-weight: 700;
+            color: var(--accent);
+            width: 30px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="/" class="btn btn-secondary"><i class="fas fa-plus"></i> Кітап қосу</a>
+            <a href="/all-books" class="btn btn-secondary"><i class="fas fa-book"></i> Барлық кітаптар</a>
+            <a href="/winners" class="btn btn-secondary"><i class="fas fa-trophy"></i> Жеңімпаздар</a>
+            <a href="/stats" class="btn btn-primary"><i class="fas fa-chart-bar"></i> Статистика</a>
+        </div>
+        
+        <div class="stats-header">
+            <h1><i class="fas fa-chart-pie"></i> Дауыс беру статистикасы</h1>
+            <p>Қалған уақыт: {{ (voting_end - now).days }} күн ({{ voting_end.strftime('%Y-%m-%d') }} аяқталады)</p>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="genreChart"></canvas>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stats-card">
+                <h3><i class="fas fa-tags"></i> Жанрлар бойынша</h3>
+                {% for genre, count in genre_stats.items() %}
+                    <div class="genre-item">
+                        <span class="genre-name">{{ genre }}</span>
+                        <span class="genre-count">{{ count }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ (count / total_votes * 100) if total_votes > 0 else 0 }}%"></div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="stats-card">
+                <h3><i class="fas fa-trophy"></i> Топ-5 кітаптар</h3>
+                <div class="top-books">
+                    {% for book in books[:5] %}
+                        <div class="book-item">
+                            <div class="book-rank">#{{ loop.index }}</div>
+                            <div style="flex-grow: 1; margin: 0 1rem;">{{ book.title }}</div>
+                            <div class="genre-count">{{ book.votes }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Жанрлар диаграммасы
+        const ctx = document.getElementById('genreChart').getContext('2d');
+        const genreChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ genre_stats.keys()|list|tojson }},
+                datasets: [{
+                    data: {{ genre_stats.values()|list|tojson }},
+                    backgroundColor: [
+                        '#3498db', '#2ecc71', '#f1c40f', '#e74c3c', 
+                        '#9b59b6', '#1abc9c', '#d35400', '#34495e'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Жанрлар бойынша дауыс таралымы',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
